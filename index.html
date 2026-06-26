@@ -831,7 +831,7 @@ function App(){
   if(load)return h('div',{className:'loading',style:{minHeight:'100vh'}},h('div',{className:'spin'}),'Carregando...');
   if(!sessao)return h(Login,{onLogin:setSessao});
   const logout=async()=>{await sb.auth.signOut();setSessao(null);};
-  const pgs={dashboard:h(Dashboard,{perfil:sessao.perfil}),amostras:h(Amostras,null),cpsdia:h(CpsDia,null),moldagem:h(Moldagem,{perfil:sessao.perfil}),recebimento:h(Recebimento,{perfil:sessao.perfil}),obras:h(Obras,null),usuarios:h(Usuarios,null),cura:h(Cura,null),relatorios:h(Relatorios,null)};
+  const pgs={dashboard:h(Dashboard,{perfil:sessao.perfil}),amostras:h(Amostras,null),cpsdia:h(CpsDia,null),moldagem:h(Moldagem,{perfil:sessao.perfil}),recebimento:h(Recebimento,{perfil:sessao.perfil}),obras:h(Obras,null),usuarios:h(Usuarios,null),cura:h(Cura,null),relatorios:h(Relatorios,null),importar:h(Importar,null)};
   const ini=(sessao.perfil.nome||'U')[0].toUpperCase();
   return h('div',{className:'app'},
     h('div',{className:'topbar'},
