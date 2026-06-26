@@ -733,7 +733,6 @@ function Importar(){
         };
         return{
           id_am:'AM-'+am,
-          numero_registro:'AM-'+am,
           cliente:c, obra_nome:n,
           matriz:String(r[iMatriz]||'').trim(),
           elemento:String(r[iFuro]||'').trim(),
@@ -752,7 +751,7 @@ function Importar(){
 
       // 3. Insere amostras em lotes de 200
       let inseridos=0;const errsLocal=[];
-      const AM_BATCH=200;
+      const AM_BATCH=50;
       for(let i=0;i<amostras.length;i+=AM_BATCH){
         setProgress({atual:i,total:amostras.length,etapa:'Importando amostras...'});
         const batch=amostras.slice(i,i+AM_BATCH);
