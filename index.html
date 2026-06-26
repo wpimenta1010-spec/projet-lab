@@ -285,7 +285,7 @@ function Dashboard({perfil}){
         sb.from('amostras').select('*',{count:'exact',head:true}).eq('fluxo','aguardando_recebimento'),
         sb.from('amostras').select('*',{count:'exact',head:true}).eq('status_resultado','ok'),
         sb.from('amostras').select('*',{count:'exact',head:true}).eq('status_resultado','nok'),
-        sb.from('amostras').select('*',{count:'exact',head:true}).eq('data_rompimento',hoje).eq('fluxo','recebido').is('fc_resultado',null),
+        sb.from('amostras').select('*',{count:'exact',head:true}).eq('data_rompimento',hoje).is('fc_resultado',null),
       ]);
       setS({total:a.count||0,ag:b.count||0,ok:c.count||0,nok:d.count||0,hoje:e.count||0});setLoad(false);
     })();
@@ -446,7 +446,7 @@ function Amostras(){
           h('thead',null,h('tr',null,h('th',null,'Registro'),h('th',null,'Obra'),h('th',null,'Moldagem'),h('th',null,'Ruptura'),h('th',null,'Id'),h('th',null,'fck'),h('th',null,'fc'),h('th',null,''))),
           h('tbody',null,lista.map(a=>h('tr',{key:a.id},
             h('td',null,a.id_am||a.etiqueta_campo),
-            h('td',{style:{fontSize:12}},a.obras?.nome),
+            h('td',{style:{fontSize:12}},a.obras?.nome||'–'),
             h('td',null,fmtD(a.data_moldagem)),
             h('td',null,fmtD(a.data_rompimento)),
             h('td',null,(a.idade_dias||'–')+'d'),
@@ -596,8 +596,8 @@ function CpsDia(){
   useEffect(()=>{
     (async()=>{
       const[{data:a},{data:b}]=await Promise.all([
-        sb.from('amostras').select('*,obras(cliente,nome)').eq('data_rompimento',hoje).eq('fluxo','recebido'),
-        sb.from('amostras').select('*,obras(cliente,nome)').gt('data_rompimento',hoje).eq('fluxo','recebido').is('fc_resultado',null).order('data_rompimento').limit(10),
+        sb.from('amostras').select('*,obras(cliente,nome)').eq('data_rompimento',hoje).is('fc_resultado',null),
+        sb.from('amostras').select('*,obras(cliente,nome)').gt('data_rompimento',hoje).is('fc_resultado',null).order('data_rompimento').limit(15),
       ]);
       setHj(a||[]);setProx(b||[]);setLoad(false);
     })();
@@ -733,19 +733,22 @@ function Importar(){
         };
         return{
           id_am:'AM-'+am,
-          cliente:c, obra_nome:n,
+          etiqueta_campo:'AM-'+am,
+          obra_id:obraIds.get(c+'|||'+n)||null,
           matriz:String(r[iMatriz]||'').trim(),
           elemento:String(r[iFuro]||'').trim(),
           traco:String(r[iReg]||'').trim(),
-          relatorio_origem:String(r[iRelat]||'').trim(),
+          relatorio:String(r[iRelat]||'').trim(),
+          fornecedor:'',
           data_moldagem:fmtDate(r[iDataMold]),
           data_rompimento:fmtDate(r[iDataRomp]),
           idade_dias:parseInt(r[iIdade])||null,
           fck_projeto:null,
+          fc_resultado:null,
           status_resultado:'pendente',
           fluxo:'recebido',
           obs:String(r[iObs]||'').trim(),
-          obra_id:obraIds.get(c+'|||'+n)||null,
+          origem:'importado',
         };
       });
 
@@ -755,7 +758,7 @@ function Importar(){
       for(let i=0;i<amostras.length;i+=AM_BATCH){
         setProgress({atual:i,total:amostras.length,etapa:'Importando amostras...'});
         const batch=amostras.slice(i,i+AM_BATCH);
-        const{error}=await sb.from('amostras_importadas').upsert(batch,{onConflict:'id_am',ignoreDuplicates:true});
+        const{error}=await sb.from('amostras').upsert(batch,{onConflict:'id_am',ignoreDuplicates:true});
         if(error)errsLocal.push('Lote '+(i/AM_BATCH+1)+': '+error.message);
         else inseridos+=batch.length;
       }
@@ -843,6 +846,3 @@ function App(){
   );
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App,null));
-</script>
-</body>
-</html>
